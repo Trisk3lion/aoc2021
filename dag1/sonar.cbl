@@ -1,6 +1,6 @@
        IDENTIFICATION DIVISION.
 
-       PROGRAM-ID.SONAR.
+       PROGRAM-ID. SONAR.
 
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
@@ -10,23 +10,29 @@
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
 
-          SELECT SONARFIL ASSIGN INDAG1
-           FILE STATUS IS INDGA1-FILESTATUS.
+          SELECT SONARFIL ASSIGN TO
+             "input.txt"
+          ORGANIZATION IS LINE SEQUENTIAL
+           FILE STATUS IS IND1-FILESTATUS.
 
        DATA DIVISION.
        FILE SECTION.
 
-       FD SONARFIL RECORDING MODE V.
-       01 SIFFRA 9(4).
+       FD SONARFIL.
+       01 SIFFRA PIC 9(4).
 
        WORKING-STORAGE SECTION.
 
        01 WS-VARIABLER.
-          05 PREV-SIFFRA 9(4),
-          05 REKNARE 9(4).
+      *    05 SIFFRA PIC 9(4).
+          05 PREV-SIFFRA PIC 9(4).
+          05 REKNARE PIC 9(4).
 
        01 END-OF-FILE-SW PIC 9.
           88 END-OF-FILE VALUE 1.
+
+       01 W-FILESTATUSES.
+          05 IND1-FILESTATUS PIC XX.
 
        PROCEDURE DIVISION.
 
@@ -36,16 +42,21 @@
           PERFORM C-COUNT
           PERFORM N-AVSLUTA
           .
+
        B-INIT SECTION.
 
           INITIALIZE WS-VARIABLER
 
-          OPEN OUTPUT SONARFIL
+          OPEN INPUT SONARFIL
 
           READ SONARFIL
                 AT END
                    SET END-OF-FILE TO TRUE
           END-READ
+
+          DISPLAY "Filestatus is: " IND1-FILESTATUS
+
+          DISPLAY "Forsta input: " SIFFRA
 
           MOVE SIFFRA TO PREV-SIFFRA
 
@@ -53,7 +64,10 @@
                 AT END
                    SET END-OF-FILE TO TRUE
           END-READ
-          .
+
+          DISPLAY "Andra input: " SIFFRA
+
+                 .
 
        C-COUNT SECTION.
 
@@ -63,19 +77,23 @@
                 ADD 1 TO REKNARE
              END-IF
 
+             MOVE SIFFRA TO PREV-SIFFRA
+
              READ SONARFIL
                 AT END
                    SET END-OF-FILE TO TRUE
              END-READ
-
           END-PERFORM
 
-          DISPLAY REKNARE
+          display "Sista Siffra: " SIFFRA
+          display "sista Prev siffra: " prev-siffra
 
-          call 'sonar3'
-
+          DISPLAY "Antal: " REKNARE
           .
+
        N-AVSLUTA SECTION.
+
+          CLOSE SONARFIL
 
           STOP RUN
           .
