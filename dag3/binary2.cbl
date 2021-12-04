@@ -5,13 +5,13 @@
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
        SPECIAL-NAMES.
-          DECIMAL-POINT IS COMMA.
+           DECIMAL-POINT IS COMMA.
 
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
 
-          SELECT BINARYFIL ASSIGN "input.txt"
-          ORGANIZATION IS LINE SEQUENTIAL
+           SELECT BINARYFIL ASSIGN "input.txt"
+           ORGANIZATION IS LINE SEQUENTIAL
              FILE STATUS IS IND1-FILESTATUS.
 
 
@@ -105,28 +105,28 @@
 
        A-MAIN SECTION.
 
-          PERFORM B-INIT
-          PERFORM C-SUMMERA
-          PERFORM D-HITTA
-          PERFORM N-AVSLUTA
-          .
+           PERFORM B-INIT
+           PERFORM C-SUMMERA
+           PERFORM D-HITTA
+           PERFORM N-AVSLUTA
+           .
        B-INIT SECTION.
 
-          INITIALIZE NUMBERS-S
-          INITIALIZE NUMBERS-SUM
-          INITIALIZE ANTAL-RADER
+           INITIALIZE NUMBERS-S
+           INITIALIZE NUMBERS-SUM
+           INITIALIZE ANTAL-RADER
 
-          OPEN INPUT BINARYFIL
+           OPEN INPUT BINARYFIL
 
-          READ BINARYFIL
-             AT END
+           READ BINARYFIL
+              AT END
                 SET END-OF-FILE TO TRUE
-          END-READ
-          .
+           END-READ
+           .
 
        C-SUMMERA SECTION.
 
-          PERFORM UNTIL END-OF-FILE
+           PERFORM UNTIL END-OF-FILE
 
              ADD 1 TO ANTAL-RADER
              SET INDEX-1 TO ANTAL-RADER
@@ -140,11 +140,11 @@
 
           END-PERFORM
 
-          DISPLAY "Antal rader: " ANTAL-RADER
+           DISPLAY "Antal rader: " ANTAL-RADER
 
-          CLOSE BINARYFIL
+           CLOSE BINARYFIL
 
-          SORT NUMBERS-ROW ON DESCENDING KEY
+           SORT NUMBERS-ROW ON DESCENDING KEY
              NUMBERS-ROW-1
              NUMBERS-ROW-2
              NUMBERS-ROW-3
@@ -166,26 +166,26 @@
 
        D-HITTA SECTION.
 
-          PERFORM DA-HITTA-OXYGEN
+           PERFORM DA-HITTA-OXYGEN
 
-          PERFORM DB-HITTA-CARBONDIOXIDE
+           PERFORM DB-HITTA-CARBONDIOXIDE
 
-          DISPLAY "Oxide:" OXYGEN
-          DISPLAY "Carbodioxide: " CARBODIOXIDE
+           DISPLAY "Oxide:" OXYGEN
+           DISPLAY "Carbodioxide: " CARBODIOXIDE
 
-          COMPUTE TOT-RESULTAT = OXYGEN * CARBODIOXIDE
+           COMPUTE TOT-RESULTAT = OXYGEN * CARBODIOXIDE
 
-          DISPLAY "Resultat: " TOT-RESULTAT
+           DISPLAY "Resultat: " TOT-RESULTAT
 
           .
 
        DA-HITTA-OXYGEN SECTION.
 
-          MOVE ANTAL-RADER TO MAX-ROW
-          MOVE 1 TO MIN-ROW
-          INITIALIZE FOUND-SW
+           MOVE ANTAL-RADER TO MAX-ROW
+           MOVE 1 TO MIN-ROW
+           INITIALIZE FOUND-SW
 
-          PERFORM VARYING INDEX-2 FROM 1 BY 1
+           PERFORM VARYING INDEX-2 FROM 1 BY 1
                 UNTIL INDEX-2 > 12 OR FOUND
 
              INITIALIZE REKNARE-4
@@ -249,9 +249,9 @@
                 SET FOUND TO TRUE
              END-IF
 
-          END-PERFORM
+           END-PERFORM
 
-          PERFORM VARYING REKNARE-3 FROM 1 BY 1
+           PERFORM VARYING REKNARE-3 FROM 1 BY 1
                 UNTIL REKNARE-3 > 12
              IF NUMBERS-X(REKNARE-3) = 1
                 COMPUTE OXYGEN = OXYGEN +
@@ -264,11 +264,11 @@
        DB-HITTA-CARBONDIOXIDE SECTION.
 
 
-          MOVE ANTAL-RADER TO MAX-ROW
-          MOVE 1 TO MIN-ROW
-          INITIALIZE FOUND-SW
+           MOVE ANTAL-RADER TO MAX-ROW
+           MOVE 1 TO MIN-ROW
+           INITIALIZE FOUND-SW
 
-          PERFORM VARYING INDEX-2 FROM 1 BY 1
+           PERFORM VARYING INDEX-2 FROM 1 BY 1
                 UNTIL INDEX-2 > 12 OR FOUND
 
              INITIALIZE REKNARE-4
@@ -333,18 +333,18 @@
                 SET FOUND TO TRUE
              END-IF
 
-          END-PERFORM
+           END-PERFORM
 
-          PERFORM VARYING REKNARE-3 FROM 1 BY 1
+           PERFORM VARYING REKNARE-3 FROM 1 BY 1
                 UNTIL REKNARE-3 > 12
              IF NUMBERS-X(REKNARE-3) = 1
                 COMPUTE CARBODIOXIDE = CARBODIOXIDE +
                    (2 ** (12 - REKNARE-3))
              END-IF
-          END-PERFORM
-          .
+           END-PERFORM
+           .
 
        N-AVSLUTA SECTION.
 
-          STOP RUN
-          .
+           STOP RUN
+           .
