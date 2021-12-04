@@ -5,13 +5,13 @@
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
        SPECIAL-NAMES.
-          DECIMAL-POINT IS COMMA.
+           DECIMAL-POINT IS COMMA.
 
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
 
-          SELECT SONARFIL ASSIGN "input.txt"
-          ORGANIZATION IS LINE SEQUENTIAL
+           SELECT SONARFIL ASSIGN "input.txt"
+           ORGANIZATION IS LINE SEQUENTIAL
            FILE STATUS IS IND1-FILESTATUS.
 
        DATA DIVISION.
@@ -41,25 +41,25 @@
 
        A-MAIN SECTION.
 
-          PERFORM B-INIT
-          PERFORM C-COUNT
-          PERFORM N-AVSLUTA
+           PERFORM B-INIT
+           PERFORM C-COUNT
+           PERFORM N-AVSLUTA
           .
        B-INIT SECTION.
 
-          INITIALIZE WS-VARIABLER
+           INITIALIZE WS-VARIABLER
 
-          OPEN INPUT SONARFIL
+           OPEN INPUT SONARFIL
 
-          READ SONARFIL
+           READ SONARFIL
                 AT END
                    SET END-OF-FILE TO TRUE
-          END-READ
+           END-READ
           .
 
        C-COUNT SECTION.
 
-          PERFORM UNTIL END-OF-FILE
+           PERFORM UNTIL END-OF-FILE
 
              INSPECT WS-INPUT TALLYING
                 REKNARE1 FOR CHARACTERS BEFORE " "
@@ -92,16 +92,16 @@
              INITIALIZE REKNARE1
              INITIALIZE REKNARE2
 
-          END-PERFORM
+           END-PERFORM
 
-          COMPUTE SUMMA = FRAMDRIFT * DJUP
+           COMPUTE SUMMA = FRAMDRIFT * DJUP
 
-          DISPLAY SUMMA
+           DISPLAY SUMMA
           .
 
        N-AVSLUTA SECTION.
 
-          CLOSE SONARFIL
+           CLOSE SONARFIL
 
-          STOP RUN
-          .
+           STOP RUN
+           .
