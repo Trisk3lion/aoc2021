@@ -100,11 +100,13 @@
            PERFORM B-INIT
            PERFORM C-BINGO-NUMMER
            PERFORM D-BINGO-TABELL
-           PERFORM E-SPELA-BINGO UNTIL BINGO
+           PERFORM E-SPELA-BINGO UNTIL BINGO OR SLUT-PA-SIFFROR
            PERFORM D-BEREKNA-POENG
            PERFORM N-AVSLUTA
            .
        B-INIT SECTION.
+
+           INITIALIZE BINGO-SW
 
            OPEN INPUT BINGOFIL
 
@@ -189,7 +191,7 @@
                    SET KOLUMN-SIFFER-INDEX TO RAD-INDEX
 
                    PERFORM VARYING SIFFER-INDEX FROM 1 BY 1
-                     UNTIL SIFFER-INDEX > 5
+                     UNTIL SIFFER-INDEX > 5 OR BINGO
                        SET KOLUMN-INDEX TO SIFFER-INDEX
                        MOVE RAD-SIFFRA
                            (TABELL-INDEX,RAD-INDEX,SIFFER-INDEX) TO
@@ -215,7 +217,7 @@
 
       *> Kontrollera kolumner efter bingo
                PERFORM VARYING KOLUMN-INDEX FROM 1 BY 1
-                 UNTIL INDEX-2 > 5
+                 UNTIL INDEX-2 > 5 OR BINGO
                    INITIALIZE ANTAL-MATCHAR
 
                    INSPECT BINGO-KOLUMN(KOLUMN-INDEX)
@@ -251,7 +253,6 @@
                            + REKNE-NUMMER
                        END-PERFORM
                        
-
                    ELSE
 
                        PERFORM VARYING SIFFER-INDEX FROM 1 BY 1
@@ -264,7 +265,7 @@
                        END-PERFORM
 
                    END-IF
-               end-perform
+               END-PERFORM
            ELSE
                PERFORM VARYING SIFFER-INDEX FROM 1 BY 1
                    UNTIL SIFFER-INDEX > 5
@@ -290,7 +291,7 @@
                        END-PERFORM
 
                    END-IF
-               end-perform
+               END-PERFORM
            END-IF
 
            COMPUTE TOT-RESULTAT = TOT-RAD-KOLUMN * TOT-OMARKERADE
