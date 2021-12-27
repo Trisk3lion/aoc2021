@@ -33,6 +33,7 @@
           05 VINNANDE-NUMMER PIC 99.
           05 REKNE-NUMMER PIC 99.
           05 ANTAL-MATCHAR PIC 9.
+          05 BINGO-LENGD PIC 9(4).
 
        01 SENASTE-NUMMER-SPACE.
            05 SENASTE-NUMMER PIC X(2) JUSTIFIED RIGHT.
@@ -52,6 +53,12 @@
                      20 RAD-SIFFRA-X   PIC X VALUE SPACE.
 
        01 ANTAL-TABELLER PIC 9(3).
+
+       01 SENASTE-BINGO-TABELL.
+           10 B-BINGO-RAD OCCURS 5 TIMES INDEXED BY B-RAD-INDEX.
+                 15 B-SIFFROR OCCURS 5 TIMES INDEXED BY B-SIFFER-INDEX.
+                     20 B-RAD-SIFFRA PIC XX JUSTIFIED RIGHT.
+                     20 B-RAD-SIFFRA-X   PIC X VALUE SPACE.
 
 
        01 TABBELL2.
@@ -101,7 +108,7 @@
            PERFORM B-INIT
            PERFORM C-BINGO-NUMMER
            PERFORM D-BINGO-TABELL
-           PERFORM E-SPELA-BINGO UNTIL BINGO OR SLUT-PA-SIFFROR
+           PERFORM E-SPELA-BINGO UNTIL SLUT-PA-SIFFROR
            PERFORM D-BEREKNA-POENG
            PERFORM N-AVSLUTA
            .
@@ -127,7 +134,11 @@
 
            MOVE FUNCTION TRIM(WS-INPUT,TRAILING) TO BINGO-NUMMER
 
+           MOVE FUNCTION LENGTH(BINGO-NUMMER) TO BINGO-LENGD
+
            DISPLAY 'Bingo-nummer: ' BINGO-NUMMER
+           DISPLAY ' '
+           DISPLAY 'Bingo längd: ' BINGO-LENGD
 
            READ BINGOFIL
               AT END
@@ -167,8 +178,10 @@ Q
 
 
            PERFORM EB-NESTA-NUMMER
-           PERFORM EC-MARKERA-TABELL
-           PERFORM ED-KONTROLLERA-TABELL
+           IF SLUT-PA-SIFFROR-SW = 0
+               PERFORM EC-MARKERA-TABELL
+               PERFORM ED-KONTROLLERA-TABELL
+           end-if
           .
 
        EB-NESTA-NUMMER SECTION.
@@ -188,9 +201,12 @@ Q
       *>     DISPLAY 'Senaste nummer: ' SENASTE-NUMMER-SPACE
       *>     DISPLAY 'Ersätts med: ' SENASTE-NUMMER-X
 
-           IF ANTAL-NUMMER = 0
+           IF PEKARE >= BINGO-LENGD
                SET SLUT-PA-SIFFROR TO TRUE
+               DISPLAY 'Slut på siffror'
            END-IF
+
+           INITIALIZE BINGO-SW
            .
 
        EC-MARKERA-TABELL SECTION.
@@ -203,91 +219,101 @@ Q
        ED-KONTROLLERA-TABELL SECTION.
 
            PERFORM VARYING TABELL-INDEX FROM 1 BY 1
-             UNTIL (TABELL-INDEX > ANTAL-TABELLER) OR BINGO
+             UNTIL (TABELL-INDEX > ANTAL-TABELLER)
 
+               INITIALIZE BINGO-SW
+
+               IF BINGO-TABELL(TABELL-INDEX) NOT = SPACES
              *> Kontrollera rader efter bingo
-               PERFORM VARYING RAD-INDEX FROM 1 BY 1
-                 UNTIL (RAD-INDEX > 5) OR BINGO
-                   MOVE ZERO TO ANTAL-MATCHAR
+                   PERFORM VARYING RAD-INDEX FROM 1 BY 1
+                     UNTIL (RAD-INDEX > 5) OR BINGO
+                       INITIALIZE ANTAL-MATCHAR
 
-                   SET KOLUMN-SIFFER-INDEX TO RAD-INDEX
+                       SET KOLUMN-SIFFER-INDEX TO RAD-INDEX
 
-                   PERFORM VARYING SIFFER-INDEX FROM 1 BY 1
-                     UNTIL SIFFER-INDEX > 5 OR BINGO
-                       SET KOLUMN-INDEX TO SIFFER-INDEX
-                       MOVE RAD-SIFFRA
+                       PERFORM VARYING SIFFER-INDEX FROM 1 BY 1
+                          UNTIL SIFFER-INDEX > 5 OR BINGO
+                           SET KOLUMN-INDEX TO SIFFER-INDEX
+                           MOVE RAD-SIFFRA
                            (TABELL-INDEX,RAD-INDEX,SIFFER-INDEX) TO
                            KOLUMN-SIFFRA
                            (KOLUMN-INDEX,KOLUMN-SIFFER-INDEX)
 
-                       MOVE RAD-SIFFRA-X
+                           MOVE RAD-SIFFRA-X
                            (TABELL-INDEX,RAD-INDEX,SIFFER-INDEX) TO
                            KOLUMN-SIFFRA-X
                            (KOLUMN-INDEX,KOLUMN-SIFFER-INDEX)
-                   END-PERFORM
+                       END-PERFORM
 
-                   INSPECT BINGO-RAD(TABELL-INDEX,RAD-INDEX)
+                       INSPECT BINGO-RAD(TABELL-INDEX,RAD-INDEX)
                        TALLYING ANTAL-MATCHAR
                        FOR ALL "X"
 
       *>             DISPLAY 'Antal matchar: ' ANTAL-MATCHAR
 
-                   IF ANTAL-MATCHAR = 5
-                       SET BINGO TO TRUE
-                       MOVE TABELL-INDEX TO VINNANDE-TABELL
-                       MOVE RAD-INDEX TO VINNANDE-RAD
-                       MOVE FUNCTION NUMVAL(SENASTE-NUMMER)
-                                               TO VINNANDE-NUMMER
+                       IF ANTAL-MATCHAR = 5
+                           SET BINGO TO TRUE
+                           MOVE TABELL-INDEX TO VINNANDE-TABELL
+                           MOVE RAD-INDEX TO VINNANDE-RAD
+                           MOVE BINGO-TABELL(TABELL-INDEX)
+                                           TO SENASTE-BINGO-TABELL
+                           MOVE SPACE TO BINGO-TABELL(TABELL-INDEX)
+                           MOVE SPACE TO TABBELL2
+                           MOVE FUNCTION NUMVAL(SENASTE-NUMMER)
+                                           TO VINNANDE-NUMMER
 
-                       DISPLAY 'BINGO!'
-                       DISPLAY 'Tabell: ' TABELL-INDEX
-                       DISPLAY 'Rad: ' RAD-INDEX
-                   END-IF
-               END-PERFORM
+                           DISPLAY 'BINGO!'
+                           DISPLAY 'Tabell: ' TABELL-INDEX
+                       END-IF
+                   END-PERFORM
 
       *> Kontrollera kolumner efter bingo
-               PERFORM VARYING KOLUMN-INDEX FROM 1 BY 1
-                 UNTIL KOLUMN-INDEX > 5 OR BINGO
-                   INITIALIZE ANTAL-MATCHAR
+                   PERFORM VARYING KOLUMN-INDEX FROM 1 BY 1
+                   UNTIL KOLUMN-INDEX > 5 OR BINGO
+                       INITIALIZE ANTAL-MATCHAR
 
-                   INSPECT BINGO-KOLUMN(KOLUMN-INDEX)
+                       INSPECT BINGO-KOLUMN(KOLUMN-INDEX)
                        TALLYING ANTAL-MATCHAR
                        FOR ALL "X"
 
-                   IF ANTAL-MATCHAR = 5
-                       SET BINGO TO TRUE
-                       MOVE TABELL-INDEX TO VINNANDE-TABELL
-                       MOVE KOLUMN-INDEX TO VINNANDE-KOLUMN
-                       MOVE FUNCTION NUMVAL(SENASTE-NUMMER)
+                       IF ANTAL-MATCHAR = 5
+                           SET BINGO TO TRUE
+                           MOVE TABELL-INDEX TO VINNANDE-TABELL
+                           MOVE KOLUMN-INDEX TO VINNANDE-KOLUMN
+                           MOVE BINGO-TABELL(TABELL-INDEX)
+                                           TO SENASTE-BINGO-TABELL
+                           MOVE SPACE TO BINGO-TABELL(TABELL-INDEX)
+                           MOVE SPACE TO TABBELL2
+                           MOVE FUNCTION NUMVAL(SENASTE-NUMMER)
                                                TO VINNANDE-NUMMER
 
-                       DISPLAY 'BINGO!'
-                       DISPLAY 'Tabell: ' TABELL-INDEX
-                       DISPLAY 'Kolumn: ' KOLUMN-INDEX
-                   END-IF
-
-               END-PERFORM
-
+                           DISPLAY 'BINGO!'
+                           DISPLAY 'Tabell: ' TABELL-INDEX
+                       END-IF
+                   END-PERFORM
+               END-IF
            END-PERFORM
            .
 
        D-BEREKNA-POENG SECTION.
 
-           SET TABELL-INDEX TO VINNANDE-TABELL
+           display ' '
+           DISPLAY 'Sista tabell: ' SENASTE-BINGO-TABELL
+           Display 'Sista nummret: ' vinnande-nummer
+           display ' '
 
-           PERFORM VARYING RAD-INDEX FROM 1 BY 1
-                   UNTIL RAD-INDEX > 5
-               PERFORM VARYING SIFFER-INDEX FROM 1 BY 1
-                         UNTIL SIFFER-INDEX > 5
-                   IF RAD-SIFFRA-X(TABELL-INDEX,
-                                     RAD-INDEX,SIFFER-INDEX) = SPACE
-                           MOVE FUNCTION NUMVAL(RAD-SIFFRA
-                               (TABELL-INDEX,RAD-INDEX,SIFFER-INDEX))
+           PERFORM VARYING B-RAD-INDEX FROM 1 BY 1
+                   UNTIL B-RAD-INDEX > 5
+               PERFORM VARYING B-SIFFER-INDEX FROM 1 BY 1
+                         UNTIL B-SIFFER-INDEX > 5
+                   IF B-RAD-SIFFRA-X(B-RAD-INDEX,B-SIFFER-INDEX) = SPACE
+                           MOVE FUNCTION NUMVAL(B-RAD-SIFFRA
+                               (B-RAD-INDEX,B-SIFFER-INDEX))
                            TO REKNE-NUMMER
                            COMPUTE TOT-OMARKERADE = TOT-OMARKERADE
                            + REKNE-NUMMER
                    END-IF
-              END-PERFORM
+               END-PERFORM
            END-PERFORM
 
 
@@ -300,6 +326,9 @@ Q
            .
 
        DA-BEREKNA-POENG-FEL SECTION.
+
+      *>     Första försöket, innan jag hade läst intruktionerna
+      *>     ordentligt.
 
            SET TABELL-INDEX TO VINNANDE-TABELL
 
